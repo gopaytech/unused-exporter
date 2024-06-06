@@ -5,4 +5,3 @@ Export unused resources on your cloud projects
 ```
 source .env.example
 go run main.go
-
