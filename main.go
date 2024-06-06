@@ -21,7 +21,6 @@ func main() {
 	prometheus.MustRegister(collectorHandler)
 	http.Handle("/metrics", promhttp.Handler())
 
-	go func() {
-		log.Fatal(http.ListenAndServe(":"+strconv.Itoa(settings.Port), nil))
-	}()
+	err = http.ListenAndServe(":"+strconv.Itoa(settings.Port), nil)
+	log.Fatal(err)
 }

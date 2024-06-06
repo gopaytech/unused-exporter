@@ -82,7 +82,7 @@ func NewGoogleData(settings settings.Settings) (*GoogleData, error) {
 		projects: settings.GCPProjects,
 	}
 
-	creds, err := newWithAPITokenSource(settings.GCPServiceAccount, []string{compute.ComputeScope})
+	creds, err := newWithAPITokenSource(settings.GCPServiceAccountBase64, []string{compute.ComputeScope})
 	if err != nil {
 		return nil, err
 	}
