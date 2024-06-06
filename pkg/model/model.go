@@ -19,4 +19,10 @@ var (
 		"Indicates unused IP Address",
 		[]string{"cloud", "region", "value", "type", "identity"}, nil,
 	)
+
+	IPAddressUsedGauge = prometheus.NewDesc(
+		prometheus.BuildFQName("ip_address", "", "used"),
+		"Indicates used IP Address",
+		[]string{"cloud", "region", "value", "type", "identity"}, nil,
+	)
 )

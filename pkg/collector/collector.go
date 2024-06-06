@@ -29,6 +29,15 @@ func (e *Collector) Collect(ch chan<- prometheus.Metric) {
 		for _, unusedIP := range unusedIPs {
 			ch <- prometheus.MustNewConstMetric(model.IPAddressUnusedGauge, prometheus.GaugeValue, 1, unusedIP.Cloud, unusedIP.Region, unusedIP.Value, unusedIP.Type, unusedIP.Identity)
 		}
+
+		usedIPs, err := e.google.GetUsedIP()
+		if err != nil {
+			return
+		}
+
+		for _, usedIP := range usedIPs {
+			ch <- prometheus.MustNewConstMetric(model.IPAddressUsedGauge, prometheus.GaugeValue, 1, usedIP.Cloud, usedIP.Region, usedIP.Value, usedIP.Type, usedIP.Identity)
+		}
 	}
 
 	if e.settings.EnableAWS {
@@ -39,6 +48,15 @@ func (e *Collector) Collect(ch chan<- prometheus.Metric) {
 
 		for _, unusedIP := range unusedIPs {
 			ch <- prometheus.MustNewConstMetric(model.IPAddressUnusedGauge, prometheus.GaugeValue, 1, unusedIP.Cloud, unusedIP.Region, unusedIP.Value, unusedIP.Type, unusedIP.Identity)
+		}
+
+		usedIPs, err := e.aws.GetUsedIP()
+		if err != nil {
+			return
+		}
+
+		for _, usedIP := range usedIPs {
+			ch <- prometheus.MustNewConstMetric(model.IPAddressUsedGauge, prometheus.GaugeValue, 1, usedIP.Cloud, usedIP.Region, usedIP.Value, usedIP.Type, usedIP.Identity)
 		}
 	}
 }

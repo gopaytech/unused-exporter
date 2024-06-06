@@ -75,6 +75,57 @@ func (g *AWSData) GetUnusedIP() ([]model.IPAddress, error) {
 	return IPs, nil
 }
 
+func (g *AWSData) GetUsedIP() ([]model.IPAddress, error) {
+	var IPs []model.IPAddress
+
+	for _, assumeRoleRegion := range g.assumeRolesRegions {
+		assume := strings.Split(assumeRoleRegion, ",")
+		role := assume[0]
+		region := assume[1]
+
+		assumeRoleOutput, err := g.stsClient.AssumeRole(context.TODO(), &sts.AssumeRoleInput{
+			RoleArn:         &role,
+			DurationSeconds: aws.Int32(int32(g.assumeRoleDuration)),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		credentialProvider := credentials.NewStaticCredentialsProvider(
+			*assumeRoleOutput.Credentials.AccessKeyId,
+			*assumeRoleOutput.Credentials.SecretAccessKey,
+			*assumeRoleOutput.Credentials.SessionToken,
+		)
+		cfg := aws.Config{
+			Credentials: credentialProvider,
+			Region:      region,
+		}
+
+		ec2Client := ec2.NewFromConfig(cfg)
+
+		input := &ec2.DescribeAddressesInput{}
+		output, err := ec2Client.DescribeAddresses(context.TODO(), input)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, address := range output.Addresses {
+			if address.AllocationId != nil && address.PublicIp != nil {
+				IPs = append(IPs, model.IPAddress{
+					Cloud:    "AWS",
+					Region:   region,
+					Value:    *address.PublicIp,
+					Type:     "Public",
+					Used:     true,
+					Identity: "Elastic IP",
+				})
+			}
+		}
+
+	}
+	return IPs, nil
+}
+
 func NewAWSData(settings settings.Settings) (*AWSData, error) {
 	awsData := &AWSData{
 		assumeRolesRegions: settings.AWSAssumeRolesRegions,

@@ -49,6 +49,34 @@ func (g *GoogleData) GetUnusedIP() ([]model.IPAddress, error) {
 	return IPs, nil
 }
 
+func (g *GoogleData) GetUsedIP() ([]model.IPAddress, error) {
+	var IPs []model.IPAddress
+
+	for _, project := range g.projects {
+		aggregatedList, err := g.computeService.Addresses.AggregatedList(project).Do()
+		if err != nil {
+			return nil, err
+		}
+
+		for region, addressesScopedList := range aggregatedList.Items {
+			for _, address := range addressesScopedList.Addresses {
+				if address.Status != "RESERVED" {
+					IPs = append(IPs, model.IPAddress{
+						Cloud:    "GCP",
+						Region:   region,
+						Identity: project + "/" + address.Name,
+						Value:    address.Address,
+						Type:     address.AddressType,
+						Used:     true,
+					})
+				}
+			}
+		}
+	}
+
+	return IPs, nil
+}
+
 func NewGoogleData(settings settings.Settings) (*GoogleData, error) {
 	g := &GoogleData{
 		projects: settings.GCPProjects,
