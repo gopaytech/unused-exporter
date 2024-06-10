@@ -20,6 +20,14 @@ func main() {
 
 	prometheus.MustRegister(collectorHandler)
 	http.Handle("/metrics", promhttp.Handler())
+	http.Handle("/healthz", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}))
+	http.Handle("/readyz", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}))
 
 	err = http.ListenAndServe(":"+strconv.Itoa(settings.Port), nil)
 	log.Fatal(err)
