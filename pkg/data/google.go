@@ -77,6 +77,12 @@ func (g *GoogleData) GetUsedIP() ([]model.IPAddress, error) {
 	return IPs, nil
 }
 
+func (g *GoogleData) GetUnusedLoadBalancer() ([]model.LoadBalancer, error) {
+	var LoadBalancers []model.LoadBalancer
+
+	return LoadBalancers, nil
+}
+
 func NewGoogleData(settings settings.Settings) (*GoogleData, error) {
 	g := &GoogleData{
 		projects: settings.GCPProjects,
